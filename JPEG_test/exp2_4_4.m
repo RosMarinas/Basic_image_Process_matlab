@@ -1,0 +1,22 @@
+close all;
+clear;
+hall=load('hall.mat');
+area=120;
+figure('Name','原始图像');
+imshow(hall.hall_gray(1:area,1:area));
+hall_dct=dct2(double(hall.hall_gray(1:area,1:area))-ones(area)*128,[area,area]);
+%系数转置
+hall_dct_transpose=hall_dct';
+figure('Name','系数矩阵转置');
+hall_dct_transpose=double(idct2(hall_dct_transpose))+ones(size(area))*128;
+imshow(uint8(hall_dct_transpose));
+%系数旋转90
+hall_dct_rot90=rot90(hall_dct);
+figure('Name','系数矩阵旋转90°');
+hall_dct_rot90=double(idct2(hall_dct_rot90))+ones(size(area))*128;
+imshow(uint8(hall_dct_rot90));
+%系数旋转180
+hall_dct_rot180=rot90(hall_dct_rot90);
+figure('Name','系数矩阵旋转180°');
+hall_dct_rot180=double(idct2(hall_dct_rot180))+ones(size(area))*128;
+imshow(uint8(hall_dct_rot180));
