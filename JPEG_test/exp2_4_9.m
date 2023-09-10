@@ -31,15 +31,15 @@ for i=1:max(size(DC_data))
     end
 end
 
-%AC系数差分编码，没有0/0需要手动添加
+%AC系数差分编码
 AC_code=[];
 uint8 run;
 uint8 count;
 run=0;
 i=1;
 for i=1:max(size(DC_data))
-    count=nnz(hall_quan_zigzag(2:63,i));
-    for j=2:63
+    count=nnz(hall_quan_zigzag(2:64,i));
+    for j=2:64
         if count==0
             AC_code=[AC_code,[1,0,1,0]];
             break;
@@ -55,7 +55,7 @@ for i=1:max(size(DC_data))
                 AC_code=[AC_code,ACTAB(run*10+n,4:(ACTAB(run*10+n,3)+3))];
                 AC_code=[AC_code,complement(hall_quan_zigzag(j,i))];
                 count=count-1;
-                run=0;                
+                run=0;
             end
         end
     end

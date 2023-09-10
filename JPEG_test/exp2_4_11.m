@@ -5,9 +5,10 @@ clear;
 clc;
 global huffman_table;
 load("hall.mat");
-imshow(hall_gray);
 load('jpegcodes.mat');
 load('JpegCoeff.mat');
+load('exp2_4_8_out.mat');
+QTAB=QTAB./2;
 huffman_table={
     '0','00';
     '1','010';
@@ -96,6 +97,7 @@ end
 h=icomplement(num2str(h));
 w=icomplement(num2str(w));
 accode=reshape(accode,[63,h*w/64]);
+error=accode-hall_quan_zigzag(2:64,:);
 hall_quant_izigzag(1,:)=DC_quant;
 hall_quant_izigzag(2:64,:)=accode;
 %逆zigzag
@@ -110,9 +112,12 @@ for r=1:8:h
         hall(r:r+7,s:s+7)=double(idct2(hall_dct(r:r+7,s:s+7)))+ones(8)*128;
     end
 end
+imshow(hall_gray);
 figure;
 imshow(uint8(hall));
-
+mse=sum(sum((double(hall)-double(hall_gray)).^2))/numel(hall);
+PSNR=10*log10(255^2/mse);
+disp(['PSNR=',num2str(PSNR)]);
 
 % huffman函数(没有用上)
 % function decode_data=huffmandecode(encode_data)
