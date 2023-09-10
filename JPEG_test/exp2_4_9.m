@@ -26,7 +26,9 @@ for i=1:max(size(DC_data))
         DC_code=[DC_code,DCTAB(n+1,2:(DCTAB(n+1,1)+1))];
     end
     %确定预测误差的huffman编码并添加到DC_code中
-    DC_code=[DC_code,complement(DC_diffcode(i))];
+    if DC_diffcode(i)~=0
+        DC_code=[DC_code,complement(DC_diffcode(i))];
+    end
 end
 
 %AC系数差分编码，没有0/0需要手动添加
