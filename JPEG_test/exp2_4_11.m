@@ -4,7 +4,8 @@ close all;
 clear;
 clc;
 global huffman_table;
-load("hall.mat");
+load("randi_test.mat");
+hall_gray=randi_test;
 load('jpegcodes.mat');
 load('JpegCoeff.mat');
 load('exp2_4_8_out.mat');
@@ -60,7 +61,7 @@ while i<=length(AC_code)
     if length(encode)==4
             if encode==EOB
                 %RunSize=[0,0];
-                accode=[accode,zeros(1,63-(length(accode)-63*count))];
+                accode=[accode,zeros(1,63-mod(length(accode),63))];%63-(length(accode)-63*count))
                 %结束并更新
                 count=count+1;
                 i=i+1;
@@ -112,7 +113,7 @@ for r=1:8:h
         hall(r:r+7,s:s+7)=double(idct2(hall_dct(r:r+7,s:s+7)))+ones(8)*128;
     end
 end
-imshow(hall_gray);
+imshow(uint8(hall_gray));
 figure;
 imshow(uint8(hall));
 mse=sum(sum((double(hall)-double(hall_gray)).^2))/numel(hall);
