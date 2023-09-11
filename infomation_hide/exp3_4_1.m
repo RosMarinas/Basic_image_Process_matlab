@@ -44,7 +44,6 @@ info_bin=reshape(info_bin,[1,info_size(1)*info_size(2)]);
 info_code=[info_code,info_bin];
 hall_bin=logical(dec2bin(double(hall_gray),8)-'0');
 hall_bin(1:length(info_code),8)=info_code';
-hall_ibin=bin2dec(num2str(hall_bin));
 hall_ibin=reshape(bin2dec(num2str(hall_bin)),[hall_h,hall_w]);
 figure("Name","信息隐藏后的图片");
 imshow(uint8(hall_ibin));
