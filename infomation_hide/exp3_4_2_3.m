@@ -1,11 +1,68 @@
 %变换域隐藏方法
+
 close all;
 clear;
 clc;
+
+
+huffman_table={
+    '0','00';
+    '1','010';
+    '2','011';
+    '3','100';
+    '4','101';
+    '5','110';
+    '6','1110';
+    '7','11110';
+    '8','111110';
+    '9','1111110';
+    '10','11111110';
+    '11','111111110';
+};
 %分块、DCT、量化
 load('hall.mat');
 load('JpegCoeff.mat');
-
+hall_size=size(hall_gray);
+hall_h=hall_size(1);
+hall_w=hall_size(2);
+figure("Name","原图");
+imshow(uint8(hall_gray));
+%-----------------------------------------信息编码------------------------------------------
+%信息编码:info_code内容包括:Category,长,Category,宽,信息的二进制流
+info='Message In A Bottle';
+disp(["info:",info]);
+%将信息编码为二维的二进制矩阵，每一行都是一个字符
+info_bin=logical(dec2bin(double(info),8)-'0');
+%获取上述二进制矩阵的长和宽
+info_size=size(info_bin);
+%类似于DC系数的形式存储矩阵的长度与宽度信息,显然这两个数都是正整数
+info_code=[];
+i=1;
+for i=1:2
+    n=floor(log2(abs(info_size(i))))+1;
+    info_code=[info_code,DCTAB(n+1,2:(DCTAB(n+1,1)+1))];  
+    info_code=[info_code,complement(info_size(i))];
+end
+info_bin=reshape(info_bin,[1,info_size(1)*info_size(2)]);
+info_code=[info_code,info_bin];
+for i=1:length(info_code)
+    if info_code(i)==0
+        info_code(i)=-1;
+    end
+end
+% hall_bin=dec2bin(hall_quan_zigzag,8)-'0';
+% hall_bin(1:64:length(info_code)*64,8)=info_code';% bin2dec居然不支持补码!!!!!
+% hall_ibin=reshape(bin2dec(num2str(hall_bin)),[64,315]);%懒了，不管效率了，直接打个补丁
+% %屎山代码开端-打补丁
+% for i=1:64
+%     for j=1:315
+%         if(hall_ibin(i,j)>127)
+%             hall_ibin(i,j)=hall_ibin(i,j)-256;
+%         end
+%     end
+% end
+% hall_quan_zigzag=hall_ibin;
+%-----------------------------------------dct量化------------------------------------------
 DC_offset=ones(8)*128;
 hall_dct2=zeros(size(hall_gray));
 hall_quan=zeros(size(hall_gray));
@@ -16,6 +73,19 @@ for i = 1:8:168
         hall_dct2(j:j+7,i:i+7)=dct2(double(hall_gray(j:j+7,i:i+7))-DC_offset);
         hall_quan(j:j+7,i:i+7)=round(hall_dct2(j:j+7,i:i+7)./QTAB);
         hall_quan_zigzag(:,21*round((j-1)/8)+round((i-1)/8)+1)=zig_zag(hall_quan(j:j+7,i:i+7));
+    end
+end
+%-------------------------------------------信息隐藏-------------------------------------------
+for i=1:length(info_code)
+    for j=64:-1:1
+        if hall_quan_zigzag(64,i)~=0
+            hall_quan_zigzag(64,i)=info_code(i);
+            break;
+        else if hall_quan_zigzag(j,i)~=0
+                hall_quan_zigzag(j+1,i)=info_code(i);
+                break;
+            end
+        end
     end
 end
 %结果保存在'exp2_4_8_out.mat'
@@ -79,31 +149,11 @@ end
 w=complement(w);
 h=complement(h);
 save('jpegcodes.mat','DC_code','AC_code','w','h');
-
-
-
-
 %------------------------------------------压缩比计算-------------------------------------------
-
 compression_ratio=168*120*8/(length(AC_code)+length(DC_code)+length(h)+length(w));
 disp(['compression_ration=',num2str(compression_ratio)]);
-
-
 %---------------------------------------------解码----------------------------------------------
-huffman_table={
-    '0','00';
-    '1','010';
-    '2','011';
-    '3','100';
-    '4','101';
-    '5','110';
-    '6','1110';
-    '7','11110';
-    '8','111110';
-    '9','1111110';
-    '10','11111110';
-    '11','111111110';
-};
+
 %DC系数解码
 %huffman解码得到category，根据category解出magnitude
 encode='';
@@ -193,9 +243,52 @@ for r=1:8:h
         hall(r:r+7,s:s+7)=double(idct2(hall_dct(r:r+7,s:s+7)))+ones(8)*128;
     end
 end
-imshow(uint8(hall_gray));
-figure;
+
+figure("Name","信息隐藏后的图");
 imshow(uint8(hall));
 mse=sum(sum((double(hall)-double(hall_gray)).^2))/numel(hall);
 PSNR=10*log10(255^2/mse);
 disp(['PSNR=',num2str(PSNR)]);
+%-----------------------------------------抗JPEG解码-----------------------------------------
+%这里采用huffman编码来确定info_bin的长和宽，因此可能会出现1.乱码2.空白
+% hall_quant_izigzag_size=size(hall_quant_izigzag);
+% hall_quant_izigzag_h=hall_quant_izigzag_size(1);
+% hall_quant_izigzag_w=hall_quant_izigzag_size(2);
+% hall_bin_find=reshape(hall_quant_izigzag,[hall_h*hall_w,1]);
+% hall_bin_find=logical(dec2bin(double(hall_bin_find),8)-'0');
+% info_code_find=hall_bin_find(1:64:20160,8)';
+info_code_find=[];
+i=1;
+for i=max(size(hall_quant_izigzag)):-1:1
+    for j=64:-1:1
+        if hall_quant_izigzag(j,i)~=0
+            info_code_find(i)=hall_quant_izigzag(j,i);   
+            break;
+        end
+    end
+end
+for i=1:length(info_code_find)
+    if info_code_find(i)==-1
+        info_code_find(i)=0;
+    end
+end
+encode='';
+info_size_decode =[];
+i=1;
+count=0;
+while i<length(info_code_find)&&count<2
+    encode=[encode num2str(info_code_find(i))];
+    match=find(strcmp(huffman_table(:,2),encode));
+    if ~isempty(match)
+        category=str2num(huffman_table{match,1});  
+        info_size_decode=[info_size_decode,icomplement(num2str(info_code_find(i+1:i+category)))];
+        encode='';
+        i=i+category;
+        count=count+1;
+    end
+    i=i+1;
+end
+info_ibin=info_code_find(i:i+info_size_decode(1)*info_size_decode(2)-1);
+info_ibin=reshape(info_ibin,[info_size_decode(1),info_size_decode(2)]);
+info_debin=char(bin2dec(num2str(info_ibin)))';
+disp(["info_debin(after jpeg):",info_debin]);
