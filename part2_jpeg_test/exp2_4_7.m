@@ -8,5 +8,5 @@
     %再利用matlab的reshape函数，将二维矩阵转换为一维向量
     %具体实现过程见zig_zag.m，这里给出一个zigzag扫描示例
     test=magic(8);
-    out=zig_zag(test);
-
+    out_1=zig_zag(test);
+    out_2=izig_zag(out_1);

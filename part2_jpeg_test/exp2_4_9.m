@@ -31,7 +31,7 @@ for i=1:max(size(DC_data))
     end
 end
 
-%AC系数差分编码
+%AC系数编码
 AC_code=[];
 uint8 run;
 uint8 count;

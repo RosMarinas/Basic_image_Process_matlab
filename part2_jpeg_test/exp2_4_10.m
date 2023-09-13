@@ -17,7 +17,7 @@ origin_size=length(origin2bin);
 load('jpegcodes.mat');
 compress=length(AC_code)+length(DC_code)+length(h)+length(w);
 compression_ratio=double(origin_size/compress);
-disp(compression_ratio);
+disp(['compression_ratio=',num2str(compression_ratio)]);
 
 function comple(x)
     global origin2bin;

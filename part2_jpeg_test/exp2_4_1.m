@@ -20,4 +20,4 @@ imshow(hall_dct_2);
 hall_idct=idct2(hall_dct_2);
 %计算两个矩阵之间的均方误差
 mse=(mean((hall_dct-hall_dct_2).^2))';
-
+mse=reshape(mse,[8,8]);

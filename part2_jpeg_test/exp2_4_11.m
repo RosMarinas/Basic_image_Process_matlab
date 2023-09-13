@@ -10,7 +10,7 @@ load('hall.mat');
 load('jpegcodes.mat');
 load('JpegCoeff.mat');
 load('exp2_4_8_out.mat');
-QTAB=QTAB;
+QTAB=QTAB./2;
 huffman_table={
     '0','00';
     '1','010';
@@ -99,7 +99,6 @@ end
 h=icomplement(num2str(h));
 w=icomplement(num2str(w));
 accode=reshape(accode,[63,h*w/64]);
-error=accode-hall_quan_zigzag(2:64,:);
 hall_quant_izigzag(1,:)=DC_quant;
 hall_quant_izigzag(2:64,:)=accode;
 %逆zigzag

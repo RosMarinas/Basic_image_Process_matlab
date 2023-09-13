@@ -15,7 +15,6 @@ hall_libdct2=dct2(double(hall.hall_gray)-ones(size(hall.hall_gray))*128);
 imshow(hall_libdct2);
 %手搓DCT与库函数之间的误差
 mse=mean((hall_mandct2-hall_libdct2).^2)';
-
 %D_calculate用于计算D矩阵：
 % function D=D_calculate(x)
 %     D=zeros(x,x);

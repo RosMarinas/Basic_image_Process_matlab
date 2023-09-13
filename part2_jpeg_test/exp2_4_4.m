@@ -13,8 +13,8 @@ imshow(uint8(hall_dct_transpose));
 %系数旋转90
 hall_dct_rot90=rot90(hall_dct);
 figure('Name','系数矩阵旋转90°');
-hall_dct_rot90=double(idct2(hall_dct_rot90))+ones(size(area))*128;
-imshow(uint8(hall_dct_rot90));
+hall_dct_rot90_=double(idct2(hall_dct_rot90))+ones(size(area))*128;
+imshow(uint8(hall_dct_rot90_));
 %系数旋转180
 hall_dct_rot180=rot90(hall_dct_rot90);
 figure('Name','系数矩阵旋转180°');

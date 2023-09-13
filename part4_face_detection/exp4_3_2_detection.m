@@ -5,10 +5,10 @@ clc;
 load('feature_extraction.mat');
 L=5;
 block_noise=10;%噪声阈值，用来抛弃过小的噪声项
-block_threshold_down=600;%脸部大小下限，用来排除手等因素干扰，正常人的脸都比手大
-block_threshold_up=4000;%脸部大小上限
+block_threshold_down=800;%脸部大小下限，用来排除手等因素干扰，正常人的脸都比手大
+block_threshold_up=40000;%脸部大小上限
 ratio=2;%脸部的长宽比上限，用来排除胳膊大腿等细长物体干扰
-test_img=imread('test2.jpg');
+test_img=imread('test1.jpg');
 %imshow(test_img);
 [row,column,color]=size(test_img);
 %将图片按4*4进行分割
@@ -33,45 +33,30 @@ for i=1:row_div
     end
 end
 %画框
+ imshow(test_img);
 [judge_bound,~]=bwboundaries(judge);
 block_num=size(judge_bound,1);
 
 block_flag=zeros(row,column);
 for i=1:block_num
-     [length_block ~]=size(judge_bound{i,1});
+     [length_block, ~]=size(judge_bound{i,1});
     if length_block<block_noise
         continue;
     end
-    x_min = min(judge_bound{i,1}(:,1))*4;
-    x_max = max(judge_bound{i,1}(:,1))*4;
-    y_min = min(judge_bound{i,1}(:,2))*4;
-    y_max = max(judge_bound{i,1}(:,2))*4;
+    x_min = min(judge_bound{i,1}(:,1))*width;
+    x_max = max(judge_bound{i,1}(:,1))*width;
+    y_min = min(judge_bound{i,1}(:,2))*width;
+    y_max = max(judge_bound{i,1}(:,2))*width;
     w=x_max-x_min;
     h=y_max-y_min;
+   
     if(w*h>block_threshold_down&&w*h<block_threshold_up&&block_flag(x_min,y_min)==0&&(max([h,w])/min([h,w])<ratio))
-        hold on;
-        %rectangle('Position',[x_min,y_min,x_max,y_max],'Curvature',0.2,'EdgeColor','b');
-        %rectangle不好用，就直接在图上将像素值设为255,0,0了
-        test_img(x_min,y_min:y_max,1)=0;
-        test_img(x_min,y_min:y_max,2)=255;
-        test_img(x_min,y_min:y_max,3)=0;
-
-        test_img(x_max,y_min:y_max,1)=0;
-        test_img(x_max,y_min:y_max,2)=255;
-        test_img(x_max,y_min:y_max,3)=0;
-
-        test_img(x_min:x_max,y_min,1)=0;
-        test_img(x_min:x_max,y_min,2)=255;
-        test_img(x_min:x_max,y_min,3)=0;
-
-        test_img(x_min:x_max,y_max,1)=0;
-        test_img(x_min:x_max,y_max,2)=255;
-        test_img(x_min:x_max,y_max,3)=0;
+        rectangle('Position',[y_min,x_min,h,w],'EdgeColor','y');
         block_flag(x_min+1:x_max-1,y_min+1:y_max-1)=1;
         
     end
 end
-imshow(test_img);
+%imshow(test_img);
 hold off;
 
 
