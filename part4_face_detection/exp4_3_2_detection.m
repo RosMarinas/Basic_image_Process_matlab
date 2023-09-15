@@ -5,19 +5,20 @@ clc;
 load('feature_extraction.mat');
 L=5;
 block_noise=10;%噪声阈值，用来抛弃过小的噪声项
-block_threshold_down=800;%脸部大小下限，用来排除手等因素干扰，正常人的脸都比手大
-block_threshold_up=40000;%脸部大小上限
+block_threshold_down=500;%脸部大小下限，用来排除手等因素干扰，正常人的脸都比手大
+block_threshold_up=40000;%脸 部大小上限
 ratio=2;%脸部的长宽比上限，用来排除胳膊大腿等细长物体干扰
-test_img=imread('test1.jpg');
+threshold=0.08;%阈值(向量內积夹角)
+test_img=imread('test5.jpg');
+
 %imshow(test_img);
 [row,column,color]=size(test_img);
+test_img(:,:,1)=test_img(:,:,1)+100;
 %将图片按4*4进行分割
 width=4;
 row_div=floor(row/width)+1;
 column_div=floor(column/width)+1;
 judge=zeros(row_div,column_div);
-%阈值
-threshold=0.08;
 
 %块内判断
 for i=1:row_div

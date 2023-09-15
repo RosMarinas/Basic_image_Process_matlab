@@ -31,11 +31,11 @@
 
 `circle_ou1`
 
-<img src="./assets/hall_color_circle_out1.jpg" alt="hall_color_circle_out1" width=300/>
+<img src="./assets/hall_color_circle_out1.jpg" alt="hall_color_circle_out1" width=350/>
 
 `circle_out2`
 
-<img src="./assets/hall_color_circle_out2.jpg" alt="hall_color_circle_out2" width=300 />
+<img src="./assets/hall_color_circle_out2.jpg" alt="hall_color_circle_out2" width=350 />
 
 ### b 国际象棋
 
@@ -573,7 +573,7 @@ function y=complement(x)
 end
 ```
 
-也是直接调用dec2bin函数，实际上dec2bin函数只有一个输入参数时会自动变为表示该字所需要的最少位数，但是dec2bin使用的是补码，并非1-补码，因此还得手动改一下（PS:或许你会奇怪为什么该函数的名字是complement（补码），唔我在一开始写的时候没有看到1-补码的“1”，从而浪费了大量的debug时间）。
+也是直接调用dec2bin函数，实际上dec2bin函数只有一个输入参数时会自动变为表示该字所需要的最少位数，但是dec2bin使用的是补码，并非1-补码，因此还得手动改一下（PS:或许会奇怪为什么该函数的名字是complement（补码），唔我在一开始写的时候没有看到1-补码的“1”，从而浪费了大量的debug时间）。
 
 ##### 运行结果
 
@@ -1136,12 +1136,82 @@ hold off;
 
 不断调节参数后结果如下：
 
-<img src="./assets/image-20230913145424061.png" alt="image-20230913145424061" style="zoom:50%;" />
+<center>
+    <img style="border-radius: 0.3125em;
+    box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);" 
+    src="./assets/untitled.png" width=300>
+    <br>
+    <div style="color:orange; border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;
+    padding: 2px;">L=6,threshold=0.05 block_noise=1</div>
+</center>
+
+<center>
+    <img style="border-radius: 0.3125em;
+    box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);" 
+    src="./assets/untitled2.png" width=300>
+    <br>
+    <div style="color:orange; border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;
+    padding: 2px;">L=6,threshold=0.04 block_noise=1</div>
+</center>
+
+<center>
+    <img style="border-radius: 0.3125em;
+    box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);" 
+    src="./assets/image-20230913145404019.png" width=300>
+    <br>
+    <div style="color:orange; border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;
+    padding: 2px;">L=5,threshold=0.08 block_noise=10</div>
+</center>
+
+<center>
+    <img style="border-radius: 0.3125em;
+    box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);" 
+    src="./assets/untitled3.png" width=500>
+    <br>
+    <div style="color:orange; border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;
+    padding: 2px;">L=5,threshold=0.08 block_noise=10</div>
+</center>
+<center>
+    <img style="border-radius: 0.3125em;
+    box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);" 
+    src="./assets/untitled5.png" width=500>
+    <br>
+    <div style="color:orange; border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;
+    padding: 2px;">L=5,threshold=0.08 block_noise=10</div>
+</center>
+
+由上图可知，该程序在一定程度上能够完成人脸识别，但存在如将手臂、腿等部位识别为人脸的问题，该问题可以通过调节图像像素上下界以及图像长宽比来解决，除此之外，与皮肤颜色相近的其他东西也很容易被识别为人脸。
 
 ### 3. 图像预处理后人脸识别
 
 #### a 顺时针旋转90°
 
+将图像顺时针旋转90°并不影响图片的颜色分布及其概率，因此并不会影响检测结果。
+
+<img src="assets/untitled6.png" alt="untitled6" style="zoom:67%;" />
+
 #### b 保持高度不变，宽度拉伸为原来的2倍
 
+<img src="assets/untitled7.png" alt="untitled7" style="zoom:67%;" />
+
+拉伸图片对人脸识别影响比较大，这里右侧人脸没有识别，推测是拉伸图片放大了其中的噪声，导致图片很容易超过阈值。调节阈值就可以解决该问题了。
+
 #### c 适当改变颜色
+
+<img src="assets/untitled8.png" alt="untitled8" style="zoom:67%;" />
+
+算法是基于颜色的，因此改变了图片颜色后人脸就完全无法识别了。
+
+### 4. 重新选择训练集
+
+从识别范围考虑，该训练集中对于白色皮肤，黑色皮肤的人脸图像较少，很容易出现识别不了的情况，因此应该尽可能的包含不同肤色的人种，且比例应尽可能一致。不过这样会引来新的问题，可能会将更多的其他物体识别为人脸，因为检测的还是概率，以及对于特定肤色的识别率有可能会下降。
